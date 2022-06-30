@@ -23,11 +23,16 @@ namespace Tmpl8
 		void SetTimer(float time);
 		void SetXAcceleration(float acceleration);
 		void SetYAcceleration(float acceleration);
+		void SetPosX(int x);
+		void SetPosY(int y);
 		
 		u32 m_color;
 		float m_ddx;
 		float m_ddy;
-
+	
+		bool m_collisionX;
+		bool m_collisionY;
+	
 	private:
 		int m_x;
 		int m_y;
@@ -38,8 +43,7 @@ namespace Tmpl8
 		
 
 		float m_timer;
-		bool m_collisionX;
-		bool m_collisionY;
+		
 
 		static int s_total;
 	};
@@ -121,55 +125,67 @@ namespace Tmpl8
 		if (acceleration < 0.001 && acceleration > -0.001)
 			m_ddx = acceleration;
 	}
+	void Oiler::SetPosX(int x) {
+		if (x - m_halfwidth >= 0 && x + m_halfwidth <= 800)
+			m_x = x;
+	}
+	void Oiler::SetPosY(int y) {
+		if (y - m_halflength >= 0 && y + m_halflength <= 512)
+			m_y = y;
+	}
+
+	float vt = 0.1; // termial velocity
+
 
 	// Functions to modify data members
 	void Oiler::Accelerate(float ddx, float ddy, float dt)
 	{
 		m_dx += ddx * dt; m_dy += ddy * dt;
-
-
-		// collisions are in here TEMPORARILY!!! Make an AABB collision function somewhere else!
+	
+		// collisions are in here TEMPORARILY!!! Make a collision function somewhere else!
 		{
-			if (m_x + m_halfwidth + m_dx * dt <= 800 && m_x - m_halfwidth + m_dx * dt >= 0)
-				m_x += m_dx * dt;
-			else if (m_x + m_halfwidth + m_dx * dt > 800) {
+			if (m_x + m_halfwidth + (m_dx * dt) >= 800) {
 				m_x = 800 - m_halfwidth;
-				m_dx = -m_dx;
 				m_collisionX = true;
 			}
-			else {
+			else if (m_x - m_halfwidth + (m_dx * dt) <= 0)
+			{
 				m_x = 0 + m_halfwidth;
-				m_dx = -m_dx;
 				m_collisionX = true;
 			}
 
-			if (m_y + m_halflength + m_dy * dt <= 512 && m_y - m_halflength + m_dy * dt >= 0)
-				m_y += m_dy * dt;
-			else if (m_y + m_halflength + m_dy * dt > 512) {
+			if (m_y + m_halflength + m_dy * dt >= 512) {
 				m_y = 512 - m_halflength;
-				m_dy = -m_dy;
 				m_collisionY = true;
 			}
-			else {
+			else if (m_y - m_halflength + m_dy * dt <= 0)
+			{
 				m_y = 0 + m_halflength;
-				m_dy = -m_dy;
 				m_collisionY = true;
 			}
-
-			if (m_collisionX)
-			{
-				m_ddx = -m_ddx * 0.3f;
-				m_collisionX = false;
-			}
-			if (m_collisionY)
-			{
-				m_ddy = -m_ddy * 0.3f;
-				m_collisionY = false;
-			}	
+		}
+		
+		if (m_collisionX == false && m_collisionY == false)
+		{
+			
+			m_y += m_dy * dt;
+			m_x += m_dx * dt;
 		}
 
-		m_dx *= 0.9;
-		m_dy *= 0.9;
+		if (m_collisionX == true)
+		{
+			m_ddx = -m_ddx * 0.1f;
+			m_dx = -m_dx * 0.4f;
+			m_collisionX = false;
+		}
+
+		if (m_collisionY == true)
+		{
+			m_ddy = -m_ddy * 0.1f;
+			m_dy = -m_dy * 0.2f;
+			m_collisionY = false;
+		}
+
 	}
 	void Oiler::TickTimer(float dt)
 	{

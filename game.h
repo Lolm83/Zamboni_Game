@@ -5,6 +5,7 @@ namespace Tmpl8 {
 
 class Surface;
 class Oiler;
+class Barrier;
 class Game
 {
 public:
@@ -19,8 +20,10 @@ public:
 	void KeyDown( int key ) { /* implement if you want to handle keys */ }
 	
 	// Hi there, Noah here, the following functions were added by me :)
-	void Draw(Oiler* oiler);
-
+	void OBCollide(Oiler* oiler, Barrier* barrier);
+	
+	void DrawOiler(Oiler* oiler);
+	void DrawBarrier(Barrier* barrier);
 private:
 	Surface* screen;
 };
